@@ -1,0 +1,38 @@
+---
+- name: Configure Complete DevOps Stack
+  hosts: ec2
+  become: true
+
+  vars:
+    #################################
+    # MySQL Variables
+    #################################
+    mysql_db: my_database
+    mysql_user: ansible
+    mysql_password: "Ahmad@123!"
+
+    #################################
+    # PostgreSQL Variables
+    #################################
+    postgres_db: pg_database
+    postgres_user: pgadmin
+    postgres_password: "Pg@12345!"
+
+  roles:
+    - role: nginx
+
+    - role: mysql
+      tags:
+        - mysql
+
+    - role: postgresql
+      tags:
+        - postgresql
+
+    - role: docker_swarm
+
+    - role: logrotate
+
+    - role: monitoring
+      tags:
+        - monitoring

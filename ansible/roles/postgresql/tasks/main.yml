@@ -1,0 +1,107 @@
+---
+# roles/postgresql/tasks/main.yml
+
+##########################################################
+# Install PostgreSQL & Python dependency
+##########################################################
+
+- name: Install PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+    update_cache: yes
+  become: true
+
+##########################################################
+# Ensure PostgreSQL service is running
+##########################################################
+
+- name: Start PostgreSQL service
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+  become: true
+
+##########################################################
+# Ensure PostgreSQL database exists
+##########################################################
+
+- name: Ensure PostgreSQL database exists
+  community.postgresql.postgresql_db:
+    name: "{{ postgres_db }}"
+    state: present
+    login_host: "localhost"
+    login_user: "postgres"
+    login_password: "PgRoot@123!"
+  become: true
+
+##########################################################
+# Ensure PostgreSQL user exists
+##########################################################
+
+- name: Ensure PostgreSQL user exists
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_user }}"
+    password: "{{ postgres_password }}"
+    role_attr_flags: LOGIN
+    state: present
+    login_host: "localhost"
+    login_user: "postgres"
+    login_password: "PgRoot@123!"
+  become: true
+
+##########################################################
+# Grant privileges to user on database
+##########################################################
+
+- name: Grant privileges on database
+  community.postgresql.postgresql_privs:
+    database: "{{ postgres_db }}"
+    roles: "{{ postgres_user }}"
+    privs: ALL
+    type: database
+    state: present
+    login_host: "localhost"
+    login_user: "postgres"
+    login_password: "PgRoot@123!"
+  become: true
+
+##########################################################
+# Copy sample SQL to remote host
+##########################################################
+
+- name: Copy sample SQL
+  copy:
+    src: sample.sql
+    dest: /tmp/pg_sample.sql
+  become: true
+
+##########################################################
+# Check if 'users' table exists
+##########################################################
+
+- name: Check if 'users' table exists
+  community.postgresql.postgresql_query:
+    db: "{{ postgres_db }}"
+    query: "SELECT to_regclass('public.users');"
+    login_user: "{{ postgres_user }}"
+    login_password: "{{ postgres_password }}"
+    login_host: "localhost"
+  register: check_users_table
+  ignore_errors: true
+  become: true
+
+##########################################################
+# Seed the database only if table doesn't exist
+##########################################################
+
+- name: Seed PostgreSQL DB
+  command: psql -h localhost -U {{ postgres_user }} -d {{ postgres_db }} -f /tmp/pg_sample.sql
+  environment:
+    PGPASSWORD: "{{ postgres_password }}"
+  when: check_users_table.query_result is not defined or check_users_table.query_result | length == 0
+  become: true

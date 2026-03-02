@@ -1,0 +1,160 @@
+---
+- name: Install dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - wget
+    - tar
+    - apt-transport-https
+    - software-properties-common
+    - gnupg
+
+##########################################################
+# Prometheus Installation
+##########################################################
+- name: Create prometheus user
+  user:
+    name: prometheus
+    shell: /bin/false
+
+- name: Create Prometheus directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+- name: Download Prometheus
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v2.50.0/prometheus-2.50.0.linux-amd64.tar.gz
+    dest: /tmp/prometheus.tar.gz
+
+- name: Extract Prometheus
+  unarchive:
+    src: /tmp/prometheus.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Move Prometheus binaries
+  copy:
+    src: "/tmp/prometheus-2.50.0.linux-amd64/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: '0755'
+    remote_src: yes
+  loop:
+    - prometheus
+    - promtool
+
+- name: Move Prometheus config and consoles
+  copy:
+    src: "/tmp/prometheus-2.50.0.linux-amd64/{{ item }}"
+    dest: "/etc/prometheus/{{ item }}"
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
+    remote_src: yes
+  loop:
+    - prometheus.yml
+    - consoles
+    - console_libraries
+
+- name: Create Prometheus systemd service
+  copy:
+    dest: /etc/systemd/system/prometheus.service
+    content: |
+      [Unit]
+      Description=Prometheus
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=prometheus
+      Group=prometheus
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus \
+        --config.file /etc/prometheus/prometheus.yml \
+        --storage.tsdb.path /var/lib/prometheus/ \
+        --web.console.templates=/etc/prometheus/consoles \
+        --web.console.libraries=/etc/prometheus/console_libraries
+
+      [Install]
+      WantedBy=multi-user.target
+  notify:
+    - restart prometheus
+
+##########################################################
+# Grafana Installation
+##########################################################
+# tasks/monitoring.yml
+
+- name: Download Grafana GPG key
+  ansible.builtin.get_url:
+    url: https://packages.grafana.com/gpg.key
+    dest: /usr/share/keyrings/grafana-archive-keyring.asc
+    mode: '0644'
+
+- name: Convert Grafana key to gpg format
+  ansible.builtin.command: >
+    gpg --dearmor -o /usr/share/keyrings/grafana-archive-keyring.gpg
+    /usr/share/keyrings/grafana-archive-keyring.asc
+  args:
+    creates: /usr/share/keyrings/grafana-archive-keyring.gpg
+
+- name: Add Grafana APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/grafana-archive-keyring.gpg] https://packages.grafana.com/oss/deb stable main"
+    filename: grafana
+    state: present
+    update_cache: yes  # Important: update cache immediately after adding repo
+
+- name: Install Grafana
+  ansible.builtin.apt:
+    name: grafana
+    state: present
+    update_cache: yes  # Make sure apt cache is updated
+##########################################################
+# PostgreSQL Exporter
+##########################################################
+- name: Download PostgreSQL exporter
+  get_url:
+    url: https://github.com/prometheus-community/postgres_exporter/releases/download/v0.12.0/postgres_exporter_v0.12.0_linux-amd64.tar.gz
+    dest: /tmp/postgres_exporter.tar.gz
+
+- name: Extract PostgreSQL exporter
+  unarchive:
+    src: /tmp/postgres_exporter.tar.gz
+    dest: /usr/local/bin/
+    remote_src: yes
+    copy: no
+
+- name: Create postgres_exporter systemd service
+  copy:
+    dest: /etc/systemd/system/postgres_exporter.service
+    content: |
+      [Unit]
+      Description=PostgreSQL Exporter
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=ubuntu
+      Group=ubuntu
+      Type=simple
+      Environment="DATA_SOURCE_NAME=postgresql://myuser:Pg@12345!@localhost:5432/mydb?sslmode=disable"
+      ExecStart=/usr/local/bin/postgres_exporter
+
+      [Install]
+      WantedBy=multi-user.target
+  notify:
+    - restart postgres_exporter
+
+- name: Enable and start postgres_exporter
+  systemd:
+    name: postgres_exporter
+    enabled: yes
+    state: started

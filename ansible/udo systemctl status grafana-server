@@ -1,0 +1,12 @@
+[0;1;32m●[0m grafana-server.service - Grafana instance
+     Loaded: loaded (]8;;file://Ahmad/usr/lib/systemd/system/grafana-server.service/usr/lib/systemd/system/grafana-server.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Mon 2026-03-02 14:10:42 UTC; 28ms ago
+       Docs: ]8;;http://docs.grafana.orghttp://docs.grafana.org]8;;
+   Main PID: 19669 (grafana)
+      Tasks: 1 (limit: 9327)
+     Memory: 512.0K (peak: 512.0K)
+        CPU: 20ms
+     CGroup: /system.slice/grafana-server.service
+             └─[0;38;5;245m19669 /usr/share/grafana/bin/grafana server --config=/etc/grafana/grafana.ini --pidfile=/run/grafana/grafana-server.pid --packaging=deb cfg:default.paths.logs=/var/log/grafana cfg:default.paths.data=/var/lib/grafana cfg:default.paths.plugins=/var/lib/grafana/plugins cfg:default.paths.provisioning=/etc/grafana/provisioning[0m
+
+Mar 02 14:10:42 Ahmad systemd[1]: Started grafana-server.service - Grafana instance.

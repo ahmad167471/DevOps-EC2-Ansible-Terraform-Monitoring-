@@ -1,0 +1,27 @@
+- name: Install logrotate
+  apt:
+    name: logrotate
+
+- name: Configure MySQL log rotation
+  copy:
+    dest: /etc/logrotate.d/mysql-custom
+    content: |
+      /var/log/mysql/*.log {
+        daily
+        rotate 7
+        compress
+        missingok
+        notifempty
+      }
+
+- name: Configure PostgreSQL log rotation
+  copy:
+    dest: /etc/logrotate.d/postgres-custom
+    content: |
+      /var/log/postgresql/*.log {
+        daily
+        rotate 7
+        compress
+        missingok
+        notifempty
+      }

@@ -1,0 +1,21 @@
+[0;1;32m●[0m grafana-server.service - Grafana instance
+     Loaded: loaded (]8;;file://Ahmad/usr/lib/systemd/system/grafana-server.service/usr/lib/systemd/system/grafana-server.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Mon 2026-03-02 14:10:42 UTC; 5min ago
+       Docs: ]8;;http://docs.grafana.orghttp://docs.grafana.org]8;;
+   Main PID: 19669 (grafana)
+      Tasks: 19 (limit: 9327)
+     Memory: 307.1M (peak: 395.3M)
+        CPU: 7.405s
+     CGroup: /system.slice/grafana-server.service
+             └─[0;38;5;245m19669 /usr/share/grafana/bin/grafana server --config=/etc/grafana/grafana.ini --pidfile=/run/grafana/grafana-server.pid --packaging=deb cfg:default.paths.logs=/var/log/grafana cfg:default.paths.data=/var/lib/grafana cfg:default.paths.plugins=/var/lib/grafana/plugins cfg:default.paths.provisioning=/etc/grafana/provisioning[0m
+
+Mar 02 14:11:51 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:11:51.746314498Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:12:21 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:12:21.657852913Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:12:51 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:12:51.586625523Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:13:21 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:13:21.504435383Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:13:51 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:13:51.444352583Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:14:21 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:14:21.355630696Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:14:51 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:14:51.288184854Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:15:21 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:15:21.210708759Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:15:51 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:15:51.134966262Z level=info msg="No last resource version found, starting from scratch" orgID=1
+Mar 02 14:16:21 Ahmad grafana[19669]: logger=dashboard-service t=2026-03-02T14:16:21.055744949Z level=info msg="No last resource version found, starting from scratch" orgID=1
